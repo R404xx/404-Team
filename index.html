@@ -236,14 +236,6 @@
             margin-bottom: 0.5rem;
         }
 
-        .discord-info code {
-            background: rgba(255, 215, 0, 0.1);
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            color: #ffd700;
-            font-family: 'Courier New', monospace;
-        }
-
         .highlights-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -439,7 +431,6 @@
             <p><strong>Requirements:</strong></p>
             <p>✅ YouTube links only</p>
             <p>✅ Video title must contain "404"</p>
-            <p style="margin-top: 1rem;"><strong>Bot Token:</strong> <code>YOUR_DISCORD_BOT_TOKEN_HERE</code></p>
         </div>
 
         <div class="highlights-grid" id="highlightsGrid">
@@ -513,35 +504,39 @@
             setTimeout(() => shootingStar.remove(), 3000);
         }, 3000);
 
-        // Sample highlights data structure
-        const highlights = [
-            // Example: { videoId: 'dQw4w9WgXcQ', title: '404 Epic Clutch Moment', date: '2025-01-15' }
-        ];
-
-        function loadHighlights() {
+        // Load highlights from JSON
+        async function loadHighlights() {
             const grid = document.getElementById('highlightsGrid');
             
-            if (highlights.length === 0) {
-                grid.innerHTML = '<div class="no-highlights">🎮 No highlights yet! Post your first epic moment through Discord bot.</div>';
-                return;
-            }
+            try {
+                const response = await fetch('highlights.json');
+                const highlights = await response.json();
+                
+                if (highlights.length === 0) {
+                    grid.innerHTML = '<div class="no-highlights">🎮 No highlights yet! Post your first epic moment through Discord bot.</div>';
+                    return;
+                }
 
-            grid.innerHTML = highlights.map(highlight => `
-                <div class="highlight-card">
-                    <div class="video-container">
-                        <iframe 
-                            src="https://www.youtube.com/embed/${highlight.videoId}" 
-                            frameborder="0" 
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                            allowfullscreen>
-                        </iframe>
+                grid.innerHTML = highlights.map(highlight => `
+                    <div class="highlight-card">
+                        <div class="video-container">
+                            <iframe 
+                                src="https://www.youtube.com/embed/${highlight.videoId}" 
+                                frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                        <div class="highlight-info">
+                            <h3>${highlight.title}</h3>
+                            <p>Posted on ${highlight.date}</p>
+                        </div>
                     </div>
-                    <div class="highlight-info">
-                        <h3>${highlight.title}</h3>
-                        <p>Posted on ${highlight.date}</p>
-                    </div>
-                </div>
-            `).join('');
+                `).join('');
+            } catch (error) {
+                console.error('Error loading highlights:', error);
+                grid.innerHTML = '<div class="no-highlights">🎮 No highlights yet! Post your first epic moment through Discord bot.</div>';
+            }
         }
 
         loadHighlights();
